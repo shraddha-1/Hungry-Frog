@@ -1,4 +1,4 @@
-/* WGSL shaders as JS strings (so the game also runs by double-clicking index.html, no server needed) */
+/* WGSL shaders as JS strings (runs by double-clicking index.html, no server needed) */
 const COMMON_WGSL=`struct View { vp: mat4x4f, cam: vec4f, clip: vec4f, camR: vec4f, camU: vec4f, camF: vec4f };
 struct Env {
   lightVP: mat4x4f,
@@ -6,6 +6,7 @@ struct Env {
   wind: vec4f, wx: vec4f, tm: vec4f, params: vec4f, cloud: vec4f, grassC: vec4f,
   push: array<vec4f, 16>, pushV: array<vec4f, 16>, ripples: array<vec4f, 16>, occ: array<vec4f, 16>,
   bird: vec4f,
+  frogP: vec4f,
 };
 const PI = 3.14159265;
 const GS = 9.0;
@@ -350,7 +351,7 @@ struct GO {
   if (abs(base.x) > GS - 0.2 || abs(base.y) > GS - 0.2) { keep = 0.0; }
   if (r3.x > keep || fade <= 0.01) { return o; }
   let th = terrainH(base);
-  let hgt = (0.10 + 0.26 * r3.y * r3.y + 0.20 * step(0.94, r3.x / max(keep, 0.01))) * (0.75 + 0.5 * fbm2(base * 0.4)) * fade * (0.28 + 0.72 * smoothstep(0.4, 2.2, pond)) * E.cloud.z;
+  let hgt = (0.10 + 0.26 * r3.y * r3.y + 0.20 * step(0.94, r3.x / max(keep, 0.01))) * (0.75 + 0.5 * fbm2(base * 0.4)) * fade * (0.28 + 0.72 * smoothstep(0.4, 2.2, pond)) * E.cloud.z * (1.0 - 0.9 * E.frogP.z * (1.0 - smoothstep(0.35, 1.1, length(base - E.frogP.xy))));
   let bw = (0.010 + 0.010 * r3.x) * (cs / 0.11);
   let ang = r2.x * 6.2831853;
   let la = r2.y * 6.2831853;
