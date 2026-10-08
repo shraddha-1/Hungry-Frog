@@ -511,7 +511,7 @@ syncUI();
 /* ---------------- FROG CATCH UI ---------------- */
 const body=document.body;
 function setMode(m){body.dataset.mode=m;}
-function show(id,on){$(id).style.display=on?'flex':'none';}
+function show(id,on){$(id).style.display=on?'flex':'none';if(id==='menu'&&on&&typeof syncDiff==='function')syncDiff();}
 function banner(text,dur){const b=$('banner');b.textContent=text;b.classList.remove('on');void b.offsetWidth;b.style.setProperty('--d',(dur||1)+'s');b.classList.add('on');}
 function comboMsg(text){const b=$('comboMsg');b.textContent=text;b.classList.remove('on');void b.offsetWidth;b.classList.add('on');}
 let hintT=0;function hint(text,dur){const h=$('hint');h.textContent=text;h.classList.add('on');clearTimeout(hintT);hintT=setTimeout(()=>h.classList.remove('on'),(dur||3)*1000);}
@@ -531,6 +531,10 @@ function showResults(e){
   $('rScore').textContent=e.score;$('rBest').textContent=e.best;$('rCombo').textContent=e.bestCombo+'×';$('rNew').style.display=e.newBest&&e.score>0?'block':'none';
   show('over',true);
 }
+const DIFF_NOTE={easy:'75 seconds • slower bugs • no bees',normal:'60 seconds • the classic pond',hard:'50 seconds • fast bugs • bees from round 2'};
+function syncDiff(){const d=G.Game.diff;document.querySelectorAll('#diff button').forEach(b=>b.setAttribute('aria-checked',b.dataset.d===d?'true':'false'));$('diffNote').textContent=DIFF_NOTE[d];$('hBest').textContent=String(G.Game.best).padStart(4,'0');}
+document.querySelectorAll('#diff button').forEach(b=>b.addEventListener('click',()=>{G.setDifficulty(b.dataset.d);syncDiff();}));
+syncDiff();
 $('playBtn').addEventListener('click',()=>startGame(false));
 $('againBtn').addEventListener('click',()=>startGame(true));
 $('watchBtn').addEventListener('click',toPond);
