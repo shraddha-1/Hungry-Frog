@@ -1922,14 +1922,15 @@ const BUGT={
   butterfly:{kind:0,size:0.056,speed:0.6,wob:0.45,acc:2,pts:2,pref:[0.4,1.1],hz:10,flee:0.45,hit:0.22},
   glow:{kind:2,size:0.036,cA:srgb([0.7,1.0,0.25]),cB:srgb([0.12,0.25,0.05]),speed:0.95,wob:0.25,acc:4,pts:5,pref:[0.4,1.0],hz:0,flee:0.45,hit:0.2,glow:0.85,glowC:[0.6,1.0,0.3]},
   dancer:{kind:3,size:0.03,cA:srgb([0.1,0.4,1.0]),cB:srgb([0.02,0.03,0.1]),speed:1.05,wob:0.3,acc:4,pts:3,pref:[0.4,1.0],hz:36,flee:0.5,hit:0.22},
-  bee:{kind:1,size:0.03,cA:srgb([0.92,0.58,0.02]),cB:srgb([0.02,0.015,0.01]),speed:0.8,wob:0.15,acc:3,pts:0,pref:[0.4,1.0],hz:36,flee:0,hit:0.2},
+  bee:{kind:1,size:0.03,cA:srgb([1.0,0.78,0.04]),cB:srgb([0.02,0.015,0.01]),speed:0.8,wob:0.15,acc:3,pts:0,pref:[0.4,1.0],hz:36,flee:0,hit:0.2},
   golden:{kind:0,size:0.056,cA:srgb([1,0.8,0.15]),cB:srgb([0.75,0.4,0.06]),speed:1.3,wob:0.7,acc:5,pts:10,pref:[0.5,1.2],hz:12,flee:0.7,hit:0.24,glow:1,glowC:[1,0.8,0.25]}
 };
 const BFC=[[[0.95,0.5,0.08],[0.05,0.03,0.02]],[[0.25,0.45,0.95],[0.04,0.06,0.15]],[[0.98,0.88,0.15],[0.1,0.07,0.02]],[[0.95,0.95,0.9],[0.2,0.2,0.2]],[[0.85,0.25,0.15],[0.08,0.04,0.03]],[[0.7,0.4,0.9],[0.1,0.05,0.15]]];
 function makeBug(type,pos,opt){
   const T=BUGT[type];const c=makeCreature(T.kind,pos);
   c.game=true;c.g=type;c.activeIdx=true;c.idx=0;c.baseSize=T.size*(type==='butterfly'?rnd(0.9,1.15):1);c.size=0.001;c.age=0;c.fade=0;c.dead=false;
-  if(type==='butterfly'){c.cA=srgb([0.97,0.56,0.72]);c.cB=srgb([0.55,0.3,0.7]);} // one consistent look: pink butterflies onlyelse if(type==='dancer'){const v=rand();const cols=v<0.5?[[0.1,0.4,1.0],[0.02,0.03,0.1]]:v<0.75?[[0.95,0.12,0.08],[0.12,0.02,0.02]]:[[0.2,0.85,0.25],[0.02,0.14,0.05]];c.cA=srgb(cols[0]);c.cB=srgb(cols[1]);c.dancerCol=v<0.5?'blue':v<0.75?'red':'green';}else{c.cA=T.cA;c.cB=T.cB;}
+  if(type==='butterfly'){c.cA=srgb([0.97,0.56,0.72]);c.cB=srgb([0.55,0.3,0.7]);}
+  else if(type==='dancer'){const v=rand();const cols=v<0.5?[[0.1,0.4,1.0],[0.02,0.03,0.1]]:v<0.75?[[0.95,0.12,0.08],[0.12,0.02,0.02]]:[[0.2,0.85,0.25],[0.02,0.14,0.05]];c.cA=srgb(cols[0]);c.cB=srgb(cols[1]);c.dancerCol=v<0.5?'blue':v<0.75?'red':'green';}else{c.cA=T.cA;c.cB=T.cB;}
   c.hz=T.hz||10;c.amp=0.9;c.pts=T.pts;c.hitR=T.hit;c.glow=T.glow||0;c.glowC=T.glowC||[1,1,1];
   c.st='wander';c.tm=rnd(0.3,1.5);c.tgt=null;c.pref=rnd(T.pref[0],T.pref[1]);c.t2=rnd(0.4,1.2);c.kick=[0,0,0];
   c.tut=!!(opt&&opt.tutorial);
