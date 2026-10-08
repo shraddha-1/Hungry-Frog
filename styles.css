@@ -846,3 +846,69 @@ body:not([data-mode=game]) #hud {
     display: none
   }
 }
+
+/* ---- Phones / tablets: message only, the game is not loaded ---- */
+#mobileMsg {
+  display: none
+}
+
+html.is-mobile body {
+  background: radial-gradient(ellipse at 50% 30%, #2d6a3a, #10241a 70%);
+  overflow: auto;
+  touch-action: auto;
+  -webkit-user-select: auto;
+  user-select: auto
+}
+
+html.is-mobile body>*:not(#mobileMsg):not(script) {
+  display: none !important
+}
+
+html.is-mobile #mobileMsg {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  text-align: center;
+  z-index: 50
+}
+
+.mm-card {
+  max-width: 420px;
+  color: #fff;
+  font-family: ui-rounded, "Nunito", "Avenir Next", system-ui, sans-serif
+}
+
+.mm-frog {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 10px
+}
+
+.mm-card h1 {
+  margin: 0 0 14px;
+  font-size: clamp(34px, 10vw, 52px);
+  font-weight: 900;
+  letter-spacing: .02em;
+  text-shadow: 0 3px 0 #2d7a2a, 0 8px 24px rgba(0, 30, 10, .5)
+}
+
+.mm-card p {
+  margin: 6px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  opacity: .9
+}
+
+.mm-card .mm-big {
+  margin-top: 16px;
+  font-size: 20px;
+  font-weight: 800;
+  opacity: 1;
+  background: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 18px;
+  padding: 14px 18px
+}

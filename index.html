@@ -6,9 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Frog Catch</title>
   <link rel="stylesheet" href="styles.css">
+  <script>
+    /* Phones and tablets: show a message instead of loading the game (it is built for keyboard + mouse). */
+    (function () {
+      var ua = navigator.userAgent || '';
+      var phoneOrTablet = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|Silk|Kindle/i.test(ua) ||
+        (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);            // iPadOS reports itself as a Mac
+      var touchOnly = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+      window.__FROG_MOBILE = !!(phoneOrTablet || touchOnly);
+      if (window.__FROG_MOBILE) document.documentElement.classList.add('is-mobile');
+    })();
+  </script>
 </head>
 
 <body>
+  <div id="mobileMsg" role="alert">
+    <div class="mm-card">
+      <div class="mm-frog" aria-hidden="true">🐸</div>
+      <h1>FROG CATCH</h1>
+      <p>This game is made for a keyboard and mouse.</p>
+      <p class="mm-big">Please open it on a laptop or desktop computer for the best experience.</p>
+    </div>
+  </div>
   <canvas id="c" aria-label="Interactive miniature frog pond"></canvas>
   <div class="title">
     <h1>Tiny Pond</h1>
@@ -137,9 +156,17 @@
       <p id="msgText">Try a recent version of Chrome, Edge or Safari with WebGPU enabled, then reload the page.</p>
     </div>
   </div>
-  <script src="js/shaders.js"></script>
-  <script src="js/sim.js"></script>
-  <script src="js/app.js"></script>
+  <script>
+    /* Load the game only on desktop (scripts keep their order: shaders -> sim -> app). */
+    if (!window.__FROG_MOBILE) {
+      ['js/shaders.js', 'js/sim.js', 'js/app.js'].forEach(function (src) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.async = false;
+        document.body.appendChild(s);
+      });
+    }
+  </script>
 </body>
 
 </html>
