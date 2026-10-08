@@ -18,9 +18,11 @@ You can run the game using either:
 
 Open `index.html` in VS Code and use the **Live Server** extension.
 
-### Python
+## Built With
 
-Run:
+- HTML
+- CSS
+- JavaScript
+- WebGPU
+- Coded with [Claude](https://claude.ai/)
 
-```bash
-python3 -m http.server 8000
