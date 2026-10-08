@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Frog Catch</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <canvas id="c" aria-label="Interactive miniature frog pond"></canvas>
+  <div class="title">
+    <h1>Tiny Pond</h1>
+    <p>Move your cursor around. Something might notice you.</p>
+  </div>
+  <div id="fps"></div>
+  <div id="stats" aria-live="off">
+    <div><span>Frame</span><b id="stFrame"></b></div>
+    <div><span>Objects</span><b id="stObj"></b></div>
+    <div><span>Particles</span><b id="stPart"></b></div>
+    <div><span>Frog</span><b id="stFrog"></b></div>
+    <div><span>Weather</span><b id="stWx"></b></div>
+    <div><span>Time</span><b id="stTime"></b></div>
+    <div><span>Active ripples</span><b id="stRip"></b></div>
+    <div><span>Render scale</span><b id="stScale"></b></div>
+  </div>
+  <div id="panel">
+    <div class="ctl"><label for="tod">Time of day <span id="vTod"></span></label><input id="tod" type="range" min="0"
+        max="24" step="0.05" value="9.5"></div>
+    <div class="ctl"><label for="wind">Wind <span id="vWind"></span></label><input id="wind" type="range" min="0"
+        max="100" step="1" value="20"></div>
+    <div class="ctl"><label for="rain">Rain <span id="vRain"></span></label><input id="rain" type="range" min="0"
+        max="100" step="1" value="0"></div>
+    <div class="ctl"><label for="act">Frog activity <span id="vAct"></span></label><input id="act" type="range" min="0"
+        max="2" step="0.05" value="1"></div>
+    <div class="ctl"><label for="rip">Ripple strength <span id="vRip"></span></label><input id="rip" type="range"
+        min="0.3" max="3" step="0.1" value="1"></div>
+    <div class="ctl"><label for="dens">Ecosystem density <span id="vDens"></span></label><input id="dens" type="range"
+        min="0.2" max="1.5" step="0.05" value="1"></div>
+    <div class="row">
+      <div class="group">
+        <select id="weather" aria-label="Weather">
+          <option>Sunny</option>
+          <option>Cloudy</option>
+          <option>Rain</option>
+          <option>Storm</option>
+          <option>Custom</option>
+        </select>
+        <button id="auto" aria-pressed="true">Day cycle</button>
+        <button id="snd" aria-pressed="false">Sound</button>
+      </div>
+      <div class="group">
+        <button id="toggle" aria-expanded="true">Controls</button>
+        <button id="throw">Drop a pebble</button>
+        <button id="rcam">Reset camera</button>
+        <button id="statsBtn" aria-pressed="false">Stats</button>
+        <button id="pause" aria-pressed="false">Pause</button>
+        <button id="reset" class="go">Reset pond</button>
+      </div>
+    </div>
+  </div>
+  <button id="modeBtn" class="go" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 64 64" fill="#000000"
+      style="display: block; flex-shrink: 0;">
+      <path fill="#000000"
+        d="M62 17c0-6.627-5.373-12-12-12c-4.755 0-8.852 2.773-10.794 6.784A33.307 33.307 0 0 0 32.012 11c-2.426 0-4.852.263-7.215.789C22.855 7.775 18.758 5 14 5C7.374 5 2 10.372 2 17c0 3.386 1.409 6.438 3.666 8.62c-2.956 5.296-3.721 10.696-3.623 11.913c.003.043.013.094.018.139C2.508 41.91 8.889 59 31.76 59h.254c23.264-.139 29.582-17.408 29.936-21.467c.106-1.232-.625-6.61-3.598-11.927A11.949 11.949 0 0 0 62 17M32.003 57h-.243c-9.285 0-16.665-2.891-21.934-8.59a25.346 25.346 0 0 1-4.144-6.064c5.314 3.059 14.615 7.152 26.32 7.152c11.726 0 21.035-4.109 26.342-7.168C55.395 48.355 47.936 56.906 32.003 57m27.954-19.641c-.039.457-.236 1.154-.6 2.01c-4.455 2.879-14.361 8.129-27.355 8.129c-12.988 0-22.896-5.244-27.357-8.125c-.371-.861-.571-1.555-.608-2.002c-.065-.883.612-5.827 3.375-10.776l.75-1.344l-1.106-1.068A9.913 9.913 0 0 1 4 17C4 11.486 8.486 7 14 7c3.86 0 7.308 2.169 8.997 5.66l.689 1.425l1.546-.344a31.243 31.243 0 0 1 6.78-.741c2.282 0 4.557.248 6.762.736l1.543.343l.689-1.424C42.695 9.167 46.142 7 50 7c5.515 0 10 4.486 10 10a9.915 9.915 0 0 1-3.041 7.171l-1.104 1.07l.75 1.341c2.772 4.957 3.424 9.897 3.352 10.777" />
+
+      <path fill="#000000"
+        d="M26.287 32C24.857 32 22 36 22 36s2.857-1.334 4.287-1.334c1.428 0 4.285 1.334 4.285 1.334s-2.859-4-4.285-4m11.426 0c-1.428 0-4.285 4-4.285 4s2.857-1.334 4.285-1.334C39.143 34.666 42 36 42 36s-2.857-4-4.287-4zM22.42 14.64l-.293-1.05l-.876.649c-1.696 1.259-4.407 2.011-7.25 2.011s-5.553-.751-7.25-2.01l-.875-.648l-.293 1.049A8.697 8.697 0 0 0 5.25 17c0 4.825 3.925 8.75 8.75 8.75s8.75-3.925 8.75-8.75c0-.782-.111-1.576-.33-2.36M14 24.25c-3.998 0-7.25-3.252-7.25-7.25c0-.31.021-.623.063-.937c.934.525 2.02.938 3.2 1.224a3.992 3.992 0 0 0 3.988 3.882a3.993 3.993 0 0 0 3.989-3.883c1.179-.286 2.263-.697 3.196-1.223c.041.313.063.626.063.937c.001 3.998-3.251 7.25-7.249 7.25m44.75-7.251a8.77 8.77 0 0 0-.33-2.359l-.293-1.05l-.876.649C55.555 15.498 52.844 16.25 50 16.25c-2.842 0-5.553-.751-7.25-2.01l-.877-.649l-.293 1.051a8.767 8.767 0 0 0-.33 2.357c0 4.825 3.926 8.75 8.75 8.75c4.825 0 8.75-3.925 8.75-8.75M50 24.249c-3.997 0-7.25-3.252-7.25-7.25c0-.31.021-.622.064-.936c.934.525 2.018.937 3.197 1.223a3.99 3.99 0 0 0 7.976 0c1.18-.286 2.266-.697 3.199-1.223c.041.313.063.626.063.936c.001 3.998-3.251 7.25-7.249 7.25" />
+    </svg>
+
+    <span>Catch mode</span>
+  </button>
+  <div id="hud" aria-live="polite">
+    <div class="hud-top">
+      <div class="hud-left" id="hTimeBox"><span class="lbl">TIME</span><b id="hTime">60</b></div>
+      <div class="hud-center"><span class="lbl">SCORE</span><b id="hScore">0000</b>
+        <div id="hCombo">COMBO × 0</div>
+        <div id="comboBar"><i></i></div>
+      </div>
+      <div class="hud-right"><span class="lbl">BEST</span><b id="hBest">0000</b></div>
+    </div>
+    <div class="keys" aria-label="Controls">
+      <div class="kgrp">
+        <div class="kcol"><kbd data-k="w">W</kbd>
+          <div class="krow"><kbd data-k="a">A</kbd><kbd data-k="s">S</kbd><kbd data-k="d">D</kbd></div>
+        </div><span>Move<br><small>or arrow keys</small></span>
+      </div>
+      <div class="kgrp"><kbd class="wide" data-k="shift">Shift</kbd><span>Sprint<br><small>hold while
+            moving</small></span></div>
+      <div class="kgrp"><kbd class="wide" data-k=" ">Space</kbd><span>Jump</span></div>
+      <div class="kgrp"><kbd class="wide">Click</kbd><span>Tongue<br><small>aim with mouse</small></span></div>
+    </div>
+    <div class="camctl" aria-label="Camera controls"><span class="cclabel">CAMERA</span><button data-k="q"
+        aria-label="Turn camera left (Q)"><kbd>Q</kbd><i>⟲</i></button><button data-k="e"
+        aria-label="Turn camera right (E)"><kbd>E</kbd><i>⟳</i></button><button data-k="r"
+        aria-label="Tilt camera up (R)"><kbd>R</kbd><i>▲</i></button><button data-k="f"
+        aria-label="Tilt camera down (F)"><kbd>F</kbd><i>▼</i></button></div>
+    <div class="hud-bottom"><button id="hPause" aria-label="Pause">❚❚</button><button id="hSnd" aria-label="Sound"
+        aria-pressed="false">♪</button></div>
+  </div>
+  <div id="banner"></div>
+  <div id="comboMsg"></div>
+  <div id="hint"></div>
+  <div id="pops"></div>
+  <div id="menu" class="ov">
+    <div class="card">
+      <h1 class="logo">FROG<br>CATCH</h1>
+      <p class="sub">Catch 'em before they fly away.</p><button id="playBtn" class="big">PLAY</button><button
+        id="menuWatch" class="sec">WATCH POND</button>
+      <div class="how">Move • Aim • Catch</div>
+    </div>
+  </div>
+  <div id="over" class="ov">
+    <div class="card">
+      <h2>NICE CATCHING 🐸</h2>
+      <div id="rNew">NEW BEST!</div>
+      <div class="stats3">
+        <div>SCORE<b id="rScore">0</b></div>
+        <div>BEST<b id="rBest">0</b></div>
+        <div>BEST COMBO<b id="rCombo">0×</b></div>
+      </div>
+      <button id="againBtn" class="big">PLAY AGAIN</button><button id="watchBtn" class="sec">WATCH POND</button>
+    </div>
+  </div>
+  <div id="pauseOv" class="ov">
+    <div class="card">
+      <h2>PAUSED</h2><button id="resumeBtn" class="big">RESUME</button><button id="restartBtn"
+        class="sec">RESTART</button><button id="quitBtn" class="sec">QUIT TO POND</button>
+    </div>
+  </div>
+  <div id="msg">
+    <div>
+      <h2>This little pond needs a browser with WebGPU support.</h2>
+      <p id="msgText">Try a recent version of Chrome, Edge or Safari with WebGPU enabled, then reload the page.</p>
+    </div>
+  </div>
+  <script src="js/shaders.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
