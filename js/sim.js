@@ -1921,7 +1921,7 @@ const BUGT={
   fly:{kind:1,size:0.05,cA:srgb([0.16,0.14,0.12]),cB:srgb([0.28,0.25,0.2]),speed:0.5,wob:0.2,acc:3,pts:1,pref:[0.3,0.8],hz:46,flee:0.4,hit:0.2},
   butterfly:{kind:0,size:0.056,speed:0.6,wob:0.45,acc:2,pts:2,pref:[0.4,1.1],hz:10,flee:0.45,hit:0.22},
   glow:{kind:2,size:0.036,cA:srgb([0.7,1.0,0.25]),cB:srgb([0.12,0.25,0.05]),speed:0.95,wob:0.25,acc:4,pts:5,pref:[0.4,1.0],hz:0,flee:0.45,hit:0.2,glow:0.85,glowC:[0.6,1.0,0.3]},
-  dancer:{kind:3,size:0.03,cA:srgb([0.1,0.4,1.0]),cB:srgb([0.02,0.03,0.1]),speed:1.05,wob:0.3,acc:4,pts:3,pref:[0.4,1.0],hz:36,flee:0.5,hit:0.22},
+  dancer:{kind:3,size:0.04,cA:srgb([0.1,0.4,1.0]),cB:srgb([0.02,0.03,0.1]),speed:1.05,wob:0.3,acc:4,pts:3,pref:[0.4,1.0],hz:36,flee:0.5,hit:0.22},
   bee:{kind:1,size:0.03,cA:srgb([1.0,0.78,0.04]),cB:srgb([0.02,0.015,0.01]),speed:0.8,wob:0.15,acc:3,pts:0,pref:[0.4,1.0],hz:36,flee:0,hit:0.2},
   golden:{kind:0,size:0.056,cA:srgb([1,0.8,0.15]),cB:srgb([0.75,0.4,0.06]),speed:1.3,wob:0.7,acc:5,pts:10,pref:[0.5,1.2],hz:12,flee:0.7,hit:0.24,glow:1,glowC:[1,0.8,0.25]}
 };

@@ -744,7 +744,7 @@ struct CO { @builtin(position) pos: vec4f, @location(0) wp: vec3f, @location(1) 
       alb = mix(in.cA * 0.7, in.cB, in.uv.y);
       sss = 0.3;
     } else {
-      alb = vec3f(0.85, 0.9, 0.95);
+      alb = mix(vec3f(0.85, 0.9, 0.95), in.cA, select(0.0, 0.3, k == 3));
       let vein = pow(0.5 + 0.5 * cos(in.uv.y * 40.0), 18.0) + pow(0.5 + 0.5 * cos(in.uv.x * 14.0), 18.0);
       alpha = 0.22 + 0.5 * vein;
       rough = 0.15;
