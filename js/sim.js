@@ -1812,7 +1812,7 @@ const Game={opts:Object.assign({},DEF_OPTS),state:'menu',on:false,ctrl:false,rou
   input:{dx:0,dz:0,sprint:false},jumpQ:false,aimPt:null,pendingFire:null,touchTgt:null,readyT:0,rb:0,spawnT:0,goldenT:18,
   tut:false,tutCaught:0,tutDone:false,crownT:0,eyeBias:0,camPulse:0,happyT:0,cfg:null,overT:0,microT:8,rainAt:-1,rainEnd:-1,todTarget:null,catches:0,
   reset(){Object.assign(Game,{state:Game.state==='menu'?'menu':'menu',on:false,ctrl:false,score:0,combo:0,comboT:0,input:{dx:0,dz:0,sprint:false},jumpQ:false,pendingFire:null,touchTgt:null,crownT:0,eyeBias:0,todTarget:null});Game.round=0;}};
-const BEE_LV=[{w:0,from:99},{w:0.6,from:3},{w:1,from:2},{w:1.9,from:1}]; // Off / Few / Normal / Many
+const BEE_LV=[{w:0,from:99},{w:0.6,from:2},{w:1,from:1},{w:1.9,from:1}]; // Off / Few / Normal / Many
 const bestKey=()=>{const o=Game.opts;return(o.time===60&&o.speed===1&&o.max===1&&o.bees===2)?'frogCatchBest':'frogCatchBest_'+[o.time,o.speed,o.max,o.bees].join('_');};
 function loadBest(){try{Game.best=+(localStorage.getItem(bestKey())||0);}catch(e){Game.best=0;}}
 function setOptions(o){
@@ -1828,7 +1828,7 @@ loadBest();
 function roundCfg(r){
   const O=Game.opts,B=BEE_LV[O.bees]||BEE_LV[2];
   const bw=r>=B.from?Math.min(0.3,0.12+0.03*(r-B.from))*B.w:0;
-  return{w:{butterfly:1,glow:r>=4?0.2:0,bee:bw},bee:bw>0,time:O.time,
+  return{w:{butterfly:1,glow:0.2,bee:bw},bee:bw>0,time:O.time,
     speed:Math.min(1.5,0.7+0.1*(r-1))*O.speed,max:Math.max(2,Math.round(Math.min(12,5+r)*O.max)),night:r>=4&&r%2===0,rain:r>=2&&((r*7)%10<3),gap:Math.max(0.35,0.9-0.08*r)/O.max};
 }
 const ev=(o)=>W.events.push(o);
@@ -1841,9 +1841,15 @@ function gameStart(next){
   G.on=true;G.ctrl=true;S.paused=false;
   const f=frog;f.asleep=false;f.sleepy=0;f.scared=0;f.freeze=0;f.hid=0;f.plan=null;f.held=false;f.micro=null;f.pt=null;f.tongue=0;f.mouth=0;f.droop=0;f.tongueMax=undefined;
   if(f.st!=='air'&&f.st!=='crouch'&&f.st!=='land')f.st=(f.surf==='water')?'swim':'idle';
-  S.auto=false;G.todTarget=G.cfg.night?22.5:10.5;
-  if(S.rain>0.1||S.wind>0.5)setWeather('Sunny');
-  G.rainAt=G.cfg.rain?rnd(16,34):-1;G.rainEnd=-1;
+  S.auto=false;
+  // day cycle: a round runs through a compressed day (morning -> golden hour); night rounds stay dark
+  G.todStart=G.cfg.night?21:7.5;G.todSpan=G.cfg.night?2:11;G.todTarget=G.todStart;
+  setWeather('Sunny');
+  // weather plan: a rain shower and/or a windy gust at random moments (at least one every round)
+  const T=G.cfg.time;let hasRain=rand()<0.65,hasWind=rand()<0.6;if(!hasRain&&!hasWind){if(rand()<0.5)hasRain=true;else hasWind=true;}
+  G.wx={rain:hasRain?{at:rnd(0.2,0.5)*T,dur:rnd(8,12)}:null,wind:hasWind?{at:rnd(0.5,0.8)*T,dur:rnd(6,9)}:null};
+  G.beeT=G.cfg.bee&&!(G.tut&&!G.tutDone)?rnd(7,12):-1;G.glowT=rnd(12,20);
+  G.rainT=0;G.windT=0.2;G.cloudT=0.3;G.rainAt=-1;G.rainEnd=-1;
   G.tut=(G.round===1&&!G.tutDone);G.tutCaught=0;G.spawnT=0;G.goldenT=rnd(14,26);G.idleSince=0;
   ev({type:'banner',text:'READY?',dur:1.0});
 }
@@ -1877,13 +1883,22 @@ function gameUpdate(dt){
     G.spawnT-=dt;
     const alive=creatures.reduce((n,c)=>n+((c.game&&!c.dead&&!c.fx&&!c.leave)?1:0),0);
     if(alive<G.cfg.max&&G.spawnT<=0){G.spawnT=G.cfg.gap;spawnBug(pickType());}
+    // guaranteed sightings so every round shows the glow bug (and bees, if enabled) at least once
+    if(G.beeT>0){G.beeT-=dt;if(G.beeT<=0){spawnBug('bee');G.beeT=G.cfg.bee?rnd(16,26)/Math.max(0.6,G.cfg.w.bee*8):-1;}}
+    if(G.glowT>0){G.glowT-=dt;if(G.glowT<=0){spawnBug('glow');G.glowT=rnd(18,30);}}
     G.goldenT-=dt;
     if(G.goldenT<=0&&G.round>=1&&G.time>8&&!creatures.some(c=>c.game&&c.g==='golden'&&!c.dead)&&!G.tut){G.goldenT=rnd(22,40);spawnBug('golden');}
-    if(G.rainAt>0){G.rainAt-=dt;if(G.rainAt<=0){S.rain=0.55;S.wind=Math.max(S.wind,0.4);G.rainEnd=14;ev({type:'hint',text:'Rain!',dur:2});}}
-    if(G.rainEnd>0){G.rainEnd-=dt;if(G.rainEnd<=0){S.rain=0;S.wind=0.2;}}
+    {const el=G.cfg.time-G.time,X=G.wx;
+      if(G.todTarget!==null)G.todTarget=G.todStart+G.todSpan*clamp(el/G.cfg.time,0,1);
+      let rainOn=false,windOn=false;
+      if(X&&X.rain){if(el>=X.rain.at&&el<X.rain.at+X.rain.dur){rainOn=true;if(!X.rain.said){X.rain.said=true;ev({type:'banner',text:'RAIN!',dur:1.0});}}}
+      if(X&&X.wind){if(el>=X.wind.at&&el<X.wind.at+X.wind.dur){windOn=true;if(!X.wind.said){X.wind.said=true;ev({type:'banner',text:'WINDY!',dur:1.0});}}}
+      G.rainT=rainOn?0.6:0;G.cloudT=rainOn?0.8:(windOn?0.45:0.3);G.windT=windOn?0.95:(rainOn?0.45:0.2);
+      const k=Math.min(1,dt*0.9);S.rain+=(G.rainT-S.rain)*k;S.wind+=(G.windT-S.wind)*k;S.cloud+=(G.cloudT-S.cloud)*k;}
     if(G.pendingFire&&canFire()){fireTongue(G.pendingFire);G.pendingFire=null;}
-    if(G.time<=0){G.time=0;G.state='over';G.overT=0;ev({type:'banner',text:"TIME!",dur:1.0});S.rain=0;S.wind=0.2;}
+    if(G.time<=0){G.time=0;G.state='over';G.overT=0;ev({type:'banner',text:"TIME!",dur:1.0});}
   }else if(G.state==='over'){
+    S.rain*=Math.exp(-dt*0.8);S.wind+=(0.2-S.wind)*Math.min(1,dt*0.8);
     if(frog.st!=='ptongue')G.overT+=dt;
     if(G.overT>1.1){
       G.state='results';G.ctrl=true;G.touchTgt=null;
@@ -1897,6 +1912,7 @@ function canFire(){const f=frog;return f.st==='idle'||f.st==='swim'||f.st==='lan
 function pickType(){
   const w=Object.assign({},Game.cfg.w);
   if(Game.cfg.night){w.glow=Math.max(w.glow,0.35);}
+  if(Game.tut&&!Game.tutDone)w.bee=0;
   let tot=0;for(const k in w)tot+=w[k];let r=rand()*tot;
   for(const k in w){r-=w[k];if(r<=0)return k;}
   return 'butterfly';
