@@ -1807,24 +1807,29 @@ function stats(){
 
 /* ============================== FROG CATCH (arcade layer) ============================== */
 const RANGE=1.7;
-const Game={diff:'normal',state:'menu',on:false,ctrl:false,round:0,score:0,combo:0,bestCombo:0,comboT:0,time:60,best:0,
+const DEF_OPTS={time:60,speed:1,max:1,bees:2};
+const Game={opts:Object.assign({},DEF_OPTS),state:'menu',on:false,ctrl:false,round:0,score:0,combo:0,bestCombo:0,comboT:0,time:60,best:0,
   input:{dx:0,dz:0,sprint:false},jumpQ:false,aimPt:null,pendingFire:null,touchTgt:null,readyT:0,rb:0,spawnT:0,goldenT:18,
   tut:false,tutCaught:0,tutDone:false,crownT:0,eyeBias:0,camPulse:0,happyT:0,cfg:null,overT:0,microT:8,rainAt:-1,rainEnd:-1,todTarget:null,catches:0,
   reset(){Object.assign(Game,{state:Game.state==='menu'?'menu':'menu',on:false,ctrl:false,score:0,combo:0,comboT:0,input:{dx:0,dz:0,sprint:false},jumpQ:false,pendingFire:null,touchTgt:null,crownT:0,eyeBias:0,todTarget:null});Game.round=0;}};
-const DIFF={
-  easy:  {time:75,speed:0.72,max:0.8,gap:1.35,bee:0,   beeFrom:99},
-  normal:{time:60,speed:1,   max:1,  gap:1,   bee:1,   beeFrom:5},
-  hard:  {time:50,speed:1.3, max:1.3,gap:0.7, bee:1.9, beeFrom:2}};
-const bestKey=d=>d==='normal'?'frogCatchBest':'frogCatchBest_'+d;
-function loadBest(){try{Game.best=+(localStorage.getItem(bestKey(Game.diff))||0);}catch(e){Game.best=0;}}
-function setDifficulty(d){if(!DIFF[d])return;Game.diff=d;try{localStorage.setItem('frogCatchDiff',d);}catch(e){}loadBest();}
-try{const d=localStorage.getItem('frogCatchDiff');if(DIFF[d])Game.diff=d;}catch(e){}
+const BEE_LV=[{w:0,from:99},{w:0.5,from:4},{w:1,from:5},{w:1.9,from:2}]; // Off / Few / Normal / Many
+const bestKey=()=>{const o=Game.opts;return(o.time===60&&o.speed===1&&o.max===1&&o.bees===2)?'frogCatchBest':'frogCatchBest_'+[o.time,o.speed,o.max,o.bees].join('_');};
+function loadBest(){try{Game.best=+(localStorage.getItem(bestKey())||0);}catch(e){Game.best=0;}}
+function setOptions(o){
+  const c=(v,a,b,d)=>{v=+v;return isFinite(v)?clamp(v,a,b):d;};
+  const n=Game.opts;
+  n.time=Math.round(c(o.time??n.time,20,180,60));n.speed=Math.round(c(o.speed??n.speed,0.4,2.5,1)*10)/10;
+  n.max=Math.round(c(o.max??n.max,0.4,2.5,1)*10)/10;n.bees=Math.round(c(o.bees??n.bees,0,3,2));
+  try{localStorage.setItem('frogCatchOpts',JSON.stringify(n));}catch(e){}
+  loadBest();
+}
+try{const o=JSON.parse(localStorage.getItem('frogCatchOpts')||'null');if(o)setOptions(o);}catch(e){}
 loadBest();
 function roundCfg(r){
-  const D=DIFF[Game.diff]||DIFF.normal;
-  const bw=r>=D.beeFrom?Math.min(0.16,0.07+0.02*(r-D.beeFrom))*D.bee:0;
-  return{w:{butterfly:1,glow:r>=4?0.2:0,bee:bw},bee:bw>0,time:D.time,
-    speed:Math.min(1.5,0.7+0.1*(r-1))*D.speed,max:Math.round(Math.min(12,5+r)*D.max),night:r>=4&&r%2===0,rain:r>=2&&((r*7)%10<3),gap:Math.max(0.35,0.9-0.08*r)*D.gap};
+  const O=Game.opts,B=BEE_LV[O.bees]||BEE_LV[2];
+  const bw=r>=B.from?Math.min(0.16,0.07+0.02*(r-B.from))*B.w:0;
+  return{w:{butterfly:1,glow:r>=4?0.2:0,bee:bw},bee:bw>0,time:O.time,
+    speed:Math.min(1.5,0.7+0.1*(r-1))*O.speed,max:Math.max(2,Math.round(Math.min(12,5+r)*O.max)),night:r>=4&&r%2===0,rain:r>=2&&((r*7)%10<3),gap:Math.max(0.35,0.9-0.08*r)/O.max};
 }
 const ev=(o)=>W.events.push(o);
 function gameStart(next){
@@ -1882,7 +1887,7 @@ function gameUpdate(dt){
     if(frog.st!=='ptongue')G.overT+=dt;
     if(G.overT>1.1){
       G.state='results';G.ctrl=true;G.touchTgt=null;
-      const newBest=G.score>G.best;if(newBest){G.best=G.score;try{localStorage.setItem(bestKey(G.diff),String(G.best));}catch(e){}}
+      const newBest=G.score>G.best;if(newBest){G.best=G.score;try{localStorage.setItem(bestKey(),String(G.best));}catch(e){}}
       for(const c of creatures)if(c.game)c.leave=true;
       ev({type:'results',score:G.score,best:G.best,bestCombo:G.bestCombo,newBest});
     }
@@ -2247,6 +2252,6 @@ function touchMove(ray){const G=Game;if(!G.touchTgt)return;const g=groundHit(ray
 // EXPORTS
 // ======================================================================
 function consumeEvents(){const e=W.events;W.events=[];return e;}
-return{setDifficulty,DIFF,spawnBug,Game,gameSnap,gameStart,gameLeave,setAim,fireTongue,touchDown,touchMove,S,W,wind,update,reset,defaults,emitAll,fillEnv,ENV,cnt,LF,PTL,PDL,BLB,TVB,TIB,BBB,creatureBuf,creatureCnt,hover,down,dragTo,up,throwAt,stats,setWeather,terrainH,pondD,groundHit,addRipple,splash,consumeEvents,frog,
+return{setOptions,DEF_OPTS,spawnBug,Game,gameSnap,gameStart,gameLeave,setAim,fireTongue,touchDown,touchMove,S,W,wind,update,reset,defaults,emitAll,fillEnv,ENV,cnt,LF,PTL,PDL,BLB,TVB,TIB,BBB,creatureBuf,creatureCnt,hover,down,dragTo,up,throwAt,stats,setWeather,terrainH,pondD,groundHit,addRipple,splash,consumeEvents,frog,
   get plants(){return plants;},get creatures(){return creatures;},get pads(){return pads;},get fish(){return fish;},windAt,BEDS,frogCenter};
 })();

@@ -913,41 +913,56 @@ html.is-mobile #mobileMsg {
   padding: 14px 18px
 }
 
-.diff {
-  display: inline-flex;
-  gap: 6px;
-  margin: 0 0 6px;
-  padding: 5px;
-  border-radius: 999px;
-  background: rgba(0, 30, 10, .35);
-  border: 1px solid rgba(255, 255, 255, .3)
+.opts {
+  width: min(340px, 86vw);
+  margin: 0 auto 16px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: rgba(0, 30, 10, .38);
+  border: 1px solid rgba(255, 255, 255, .3);
+  text-align: left
 }
 
-.diff button {
-  font: inherit;
+.opts label {
+  display: grid;
+  grid-template-columns: 104px 1fr 54px;
+  align-items: center;
+  gap: 10px;
+  margin: 7px 0;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 0 1px 6px rgba(0, 30, 10, .6)
+}
+
+.opts b {
+  text-align: right;
   font-weight: 800;
-  font-size: 13px;
-  letter-spacing: .06em;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: transparent;
-  color: #fff;
+  font-size: 13px
+}
+
+.opts input[type=range] {
+  width: 100%;
+  accent-color: #ffd54a;
+  margin: 0;
+  cursor: pointer
+}
+
+.opts .lnk {
+  display: block;
+  margin: 8px auto 0;
+  background: none;
   border: 0;
-  cursor: pointer;
-  margin: 0
-}
-
-.diff button[aria-checked="true"] {
-  background: #fff;
-  color: #1b5a22;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .25)
-}
-
-.diffnote {
-  min-height: 18px;
-  margin: 0 0 14px;
-  font-size: 13px;
-  font-weight: 650;
   color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 30, 10, .7)
+  opacity: .8;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 2px 6px
+}
+
+.opts .lnk:hover {
+  opacity: 1
 }

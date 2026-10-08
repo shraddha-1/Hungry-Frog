@@ -511,7 +511,7 @@ syncUI();
 /* ---------------- FROG CATCH UI ---------------- */
 const body=document.body;
 function setMode(m){body.dataset.mode=m;}
-function show(id,on){$(id).style.display=on?'flex':'none';if(id==='menu'&&on&&typeof syncDiff==='function')syncDiff();}
+function show(id,on){$(id).style.display=on?'flex':'none';if(id==='menu'&&on&&typeof syncOpts==='function')syncOpts();}
 function banner(text,dur){const b=$('banner');b.textContent=text;b.classList.remove('on');void b.offsetWidth;b.style.setProperty('--d',(dur||1)+'s');b.classList.add('on');}
 function comboMsg(text){const b=$('comboMsg');b.textContent=text;b.classList.remove('on');void b.offsetWidth;b.classList.add('on');}
 let hintT=0;function hint(text,dur){const h=$('hint');h.textContent=text;h.classList.add('on');clearTimeout(hintT);hintT=setTimeout(()=>h.classList.remove('on'),(dur||3)*1000);}
@@ -531,10 +531,15 @@ function showResults(e){
   $('rScore').textContent=e.score;$('rBest').textContent=e.best;$('rCombo').textContent=e.bestCombo+'×';$('rNew').style.display=e.newBest&&e.score>0?'block':'none';
   show('over',true);
 }
-const DIFF_NOTE={easy:'75 seconds • slower bugs • no bees',normal:'60 seconds • the classic pond',hard:'50 seconds • fast bugs • bees from round 2'};
-function syncDiff(){const d=G.Game.diff;document.querySelectorAll('#diff button').forEach(b=>b.setAttribute('aria-checked',b.dataset.d===d?'true':'false'));$('diffNote').textContent=DIFF_NOTE[d];$('hBest').textContent=String(G.Game.best).padStart(4,'0');}
-document.querySelectorAll('#diff button').forEach(b=>b.addEventListener('click',()=>{G.setDifficulty(b.dataset.d);syncDiff();}));
-syncDiff();
+const BEE_TXT=['Off','Few','Normal','Many'];
+function syncOpts(){const o=G.Game.opts;
+  $('oTime').value=o.time;$('oSpeed').value=o.speed;$('oMax').value=o.max;$('oBees').value=o.bees;
+  $('vTime').textContent=o.time+'s';$('vSpeed').textContent='×'+o.speed.toFixed(1);$('vMax').textContent='×'+o.max.toFixed(1);$('vBees').textContent=BEE_TXT[o.bees];
+  $('hBest').textContent=String(G.Game.best).padStart(4,'0');}
+function readOpts(){G.setOptions({time:$('oTime').value,speed:$('oSpeed').value,max:$('oMax').value,bees:$('oBees').value});syncOpts();}
+['oTime','oSpeed','oMax','oBees'].forEach(id=>$(id).addEventListener('input',readOpts));
+$('oReset').addEventListener('click',()=>{G.setOptions(G.DEF_OPTS);syncOpts();});
+syncOpts();
 $('playBtn').addEventListener('click',()=>startGame(false));
 $('againBtn').addEventListener('click',()=>startGame(true));
 $('watchBtn').addEventListener('click',toPond);
