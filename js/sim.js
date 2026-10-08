@@ -1802,10 +1802,9 @@ function stats(){
 }
 
 // ======================================================================
-// FROG CATCH: game rules, bug AI, tongue, player control
+// HUNGRY FROG: game rules, bug AI, tongue, player control
 // ======================================================================
 
-/* ============================== FROG CATCH (arcade layer) ============================== */
 const RANGE=1.7;
 const DEF_OPTS={time:60,speed:1,max:1,bees:2};
 const Game={opts:Object.assign({},DEF_OPTS),state:'menu',on:false,ctrl:false,round:0,score:0,combo:0,bestCombo:0,comboT:0,time:60,best:0,

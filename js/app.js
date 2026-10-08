@@ -508,7 +508,7 @@ function updateStats(){
   }
 }
 syncUI();
-/* ---------------- FROG CATCH UI ---------------- */
+/* ---------------- HUNGRY FROG UI ---------------- */
 const body=document.body;
 function setMode(m){body.dataset.mode=m;}
 function show(id,on){$(id).style.display=on?'flex':'none';if(id==='menu'&&on&&typeof syncOpts==='function')syncOpts();}
