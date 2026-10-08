@@ -2036,8 +2036,8 @@ function updateBugs(dt){
     if(b.st==='flee'){
       b.tm-=dt;const ff=b.fleeFrom;const d=sub(b.p,ff);const l=vlen(d)||1;
       const away=[b.p[0]+d[0]/l*3,b.p[1]+0.6+Math.abs(d[1]/l)*2,b.p[2]+d[2]/l*3];
-      bugSteer(b,away,T.speed*spd*1.5,dt,0.3,5);b.amp=0.95;b.hz=(T.hz||10)*1.3;
-      if(b.tm<=0){b.st='wander';b.tgt=null;}
+      bugSteer(b,away,T.speed*spd*(b.dodge?2.6:1.5),dt,0.3,5);b.amp=0.95;b.hz=(T.hz||10)*1.3;
+      if(b.tm<=0){b.st='wander';b.tgt=null;if(b.dodge){b.dodge=false;b.noCatch=false;}}
     }else if(b.st==='land'){
       b.tm-=dt;const lp=landPos(b);
       if(!lp){b.st='wander';b.tgt=null;}
@@ -2079,7 +2079,10 @@ function fireTongue(ray){
   for(const b of creatures){if(!b.game||b.dead||b.noCatch||b.fade<0.5||b.leave)continue;
     const rd=rayDist(ray.o,ray.d,b.p);if(rd<0.9&&dist(M,b.p)<RANGE*1.3&&rd<bd){bd=rd;best=b;}}
   let T;
-  if(best){T=madd(best.p,best.v,0.1);}
+  if(best){T=madd(best.p,best.v,0.1);
+    // a bee senses the tongue coming: most of the time it darts away from the frog and the shot misses
+    if(best.g==='bee'&&rand()<0.75){best.st='flee';best.tm=1.6;best.fleeFrom=[f.p[0],f.p[1]+0.1,f.p[2]];best.landTgt=null;best.noCatch=true;best.dodge=true;best.v=[0,0,0];}
+  }
   else{
     let P=null;const h=Math.max(M[1],f.p[1]+0.12);
     if(ray.d[1]<-0.001){const t=(h-ray.o[1])/ray.d[1];if(t>0)P=madd(ray.o,ray.d,t);}
