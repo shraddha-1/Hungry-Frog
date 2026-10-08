@@ -787,7 +787,8 @@ struct CO { @builtin(position) pos: vec4f, @location(0) wp: vec3f, @location(1) 
     if (dth > alpha) { discard; }
   }
   let Vv = normalize(V.cam.xyz - in.wp);
-  let sh = shadowAt(in.wp, N);
+  var sh = shadowAt(in.wp, N);
+  if (pi >= 1 && pi <= 4) { sh = mix(sh, 1.0, 0.85); }
   var col = shadeSurf(alb, N, Vv, in.wp, sh, 1.0, sss, rough, E.wx.y * 0.5);
   col = fogApply(col, in.wp);
   return vec4f(col, length(in.wp - V.cam.xyz));
