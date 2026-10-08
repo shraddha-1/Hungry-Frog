@@ -1949,7 +1949,7 @@ function spawnBug(type,opt){
     else if(region===5){const rk=objs.filter(o=>o.kind==='rock');if(rk.length){const o=rk[Math.floor(rand()*rk.length)];p=[o.p[0],o.p[1]+o.sc[1]+0.2,o.p[2]];}}
     if(!p)continue;
     const dx=p[0]-f.p[0],dz=p[2]-f.p[2],d=Math.hypot(dx,dz);
-    if(d<1.8)continue;
+    if(d<1.8||(type==='bee'&&d<3.2))continue;
     if(Math.abs(wrapA(Math.atan2(dx,dz)-f.yaw))<0.7&&d<3.6)continue;
     if(Math.hypot(p[0],p[2])>7)continue;
     pos=p;
@@ -1980,7 +1980,8 @@ function pickBugTarget(b){
     if(trees.length){const t=trees[Math.floor(rand()*trees.length)];const br=t.branches[Math.floor(rand()*t.branches.length)];const n=br.pos[br.pos.length-1];b.tgt=[n[0],n[1]+0.03,n[2]];b.landTgt={type:'branch',br,t};return;}}
   // wander, biased to hover around the frog's neighbourhood so there is always something to chase
   let cx=b.p[0],cz=b.p[2],rad=2.6;
-  if(rand()<0.75){const a=rand()*TAU;cx=f.p[0]+Math.cos(a)*rnd(0.8,1.9);cz=f.p[2]+Math.sin(a)*rnd(0.8,1.9);rad=0.7;}
+  if(b.g==='bee'){const a=rand()*TAU,r=Math.sqrt(rand())*5.4;cx=Math.cos(a)*r;cz=Math.sin(a)*r*0.85;rad=1.2;}
+  else if(rand()<0.75){const a=rand()*TAU;cx=f.p[0]+Math.cos(a)*rnd(0.8,1.9);cz=f.p[2]+Math.sin(a)*rnd(0.8,1.9);rad=0.7;}
   const a=rand()*TAU,q=rnd(0.3,1)*rad;
   let x=cx+Math.cos(a)*q,z=cz+Math.sin(a)*q;
   const hh=Math.hypot(x,z);if(hh>6.5){x*=6.5/hh;z*=6.5/hh;}
@@ -2141,11 +2142,12 @@ function onCatch(b,pt){
   const G=Game,f=frog;
   if(b.g==='bee'){ // ouch
     G.combo=0;G.comboT=0;f.scared=1.5;f.spin=0.8;G.eyeBias=0;f.pupil=1;
+    const lost=Math.min(G.score,5);G.score-=lost;if(lost>0)ev({type:'pop',text:'-'+lost,p:b.p.slice(),big:false,combo:0});
     const away=nrm([f.p[0]-b.p[0],0,f.p[2]-b.p[2]]);
     f.pt=null;f.tongue=0;f.mouth=0;f.tongueMax=undefined;
     planJump(clamp(f.p[0]+away[0]*0.8,-GS+1.5,GS-1.5),clamp(f.p[2]+away[2]*0.8,-GS+1.5,GS-1.5),null,true);
     b.st='chase';b.tm=3.2;sparkBurst(pt,[1,0.8,0.2],8);
-    ev({type:'banner',text:'BZZZT!',dur:0.9});ev({type:'ribbit'});ev({type:'bee'});
+    ev({type:'banner',text:'BZZZT!  -5',dur:0.9});ev({type:'ribbit'});ev({type:'bee'});
     return;
   }
   b.dead=true;
