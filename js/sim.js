@@ -1812,7 +1812,7 @@ const Game={opts:Object.assign({},DEF_OPTS),state:'menu',on:false,ctrl:false,rou
   input:{dx:0,dz:0,sprint:false},jumpQ:false,aimPt:null,pendingFire:null,touchTgt:null,readyT:0,rb:0,spawnT:0,goldenT:18,
   tut:false,tutCaught:0,tutDone:false,crownT:0,eyeBias:0,camPulse:0,happyT:0,cfg:null,overT:0,microT:8,rainAt:-1,rainEnd:-1,todTarget:null,catches:0,
   reset(){Object.assign(Game,{state:Game.state==='menu'?'menu':'menu',on:false,ctrl:false,score:0,combo:0,comboT:0,input:{dx:0,dz:0,sprint:false},jumpQ:false,pendingFire:null,touchTgt:null,crownT:0,eyeBias:0,todTarget:null});Game.round=0;}};
-const BEE_LV=[{w:0,from:99},{w:0.5,from:4},{w:1,from:5},{w:1.9,from:2}]; // Off / Few / Normal / Many
+const BEE_LV=[{w:0,from:99},{w:0.6,from:3},{w:1,from:2},{w:1.9,from:1}]; // Off / Few / Normal / Many
 const bestKey=()=>{const o=Game.opts;return(o.time===60&&o.speed===1&&o.max===1&&o.bees===2)?'frogCatchBest':'frogCatchBest_'+[o.time,o.speed,o.max,o.bees].join('_');};
 function loadBest(){try{Game.best=+(localStorage.getItem(bestKey())||0);}catch(e){Game.best=0;}}
 function setOptions(o){
@@ -1827,7 +1827,7 @@ try{const o=JSON.parse(localStorage.getItem('frogCatchOpts')||'null');if(o)setOp
 loadBest();
 function roundCfg(r){
   const O=Game.opts,B=BEE_LV[O.bees]||BEE_LV[2];
-  const bw=r>=B.from?Math.min(0.16,0.07+0.02*(r-B.from))*B.w:0;
+  const bw=r>=B.from?Math.min(0.3,0.12+0.03*(r-B.from))*B.w:0;
   return{w:{butterfly:1,glow:r>=4?0.2:0,bee:bw},bee:bw>0,time:O.time,
     speed:Math.min(1.5,0.7+0.1*(r-1))*O.speed,max:Math.max(2,Math.round(Math.min(12,5+r)*O.max)),night:r>=4&&r%2===0,rain:r>=2&&((r*7)%10<3),gap:Math.max(0.35,0.9-0.08*r)/O.max};
 }
@@ -1869,7 +1869,7 @@ function gameUpdate(dt){
       G.state='play';
       if(G.tut){const b=spawnBug('butterfly',{tutorial:true});ev({type:'hint',text:'Catch it.',dur:6});}
       for(let i=0;i<3;i++)spawnBug(pickType());
-      if(!G.tut)ev({type:'hint',text:G.cfg.bee?'Catch the butterflies  •  Avoid the bees':'Catch the butterflies',dur:4});
+      if(!G.tut)ev({type:'hint',text:G.cfg.bee?'Catch butterflies  •  AVOID the yellow-black striped bees':'Catch the butterflies',dur:4});
     }
   }else if(G.state==='play'){
     G.time-=dt;
@@ -1905,14 +1905,14 @@ const BUGT={
   fly:{kind:1,size:0.05,cA:srgb([0.16,0.14,0.12]),cB:srgb([0.28,0.25,0.2]),speed:0.5,wob:0.2,acc:3,pts:1,pref:[0.3,0.8],hz:46,flee:0.4,hit:0.2},
   butterfly:{kind:0,size:0.075,speed:0.6,wob:0.45,acc:2,pts:2,pref:[0.4,1.1],hz:10,flee:0.45,hit:0.22},
   glow:{kind:2,size:0.046,cA:srgb([0.7,1.0,0.25]),cB:srgb([0.12,0.25,0.05]),speed:0.95,wob:0.25,acc:4,pts:5,pref:[0.4,1.0],hz:0,flee:0.45,hit:0.2,glow:0.85,glowC:[0.6,1.0,0.3]},
-  bee:{kind:1,size:0.046,cA:srgb([0.95,0.72,0.08]),cB:srgb([0.04,0.03,0.02]),speed:0.8,wob:0.15,acc:3,pts:0,pref:[0.4,1.0],hz:36,flee:0,hit:0.17},
+  bee:{kind:1,size:0.085,cA:srgb([1.0,0.85,0.08]),cB:srgb([0.02,0.015,0.01]),speed:0.8,wob:0.15,acc:3,pts:0,pref:[0.4,1.0],hz:36,flee:0,hit:0.2},
   golden:{kind:0,size:0.07,cA:srgb([1,0.8,0.15]),cB:srgb([0.75,0.4,0.06]),speed:1.3,wob:0.7,acc:5,pts:10,pref:[0.5,1.2],hz:12,flee:0.7,hit:0.24,glow:1,glowC:[1,0.8,0.25]}
 };
 const BFC=[[[0.95,0.5,0.08],[0.05,0.03,0.02]],[[0.25,0.45,0.95],[0.04,0.06,0.15]],[[0.98,0.88,0.15],[0.1,0.07,0.02]],[[0.95,0.95,0.9],[0.2,0.2,0.2]],[[0.85,0.25,0.15],[0.08,0.04,0.03]],[[0.7,0.4,0.9],[0.1,0.05,0.15]]];
 function makeBug(type,pos,opt){
   const T=BUGT[type];const c=makeCreature(T.kind,pos);
   c.game=true;c.g=type;c.activeIdx=true;c.idx=0;c.baseSize=T.size*(type==='butterfly'?rnd(0.9,1.15):1);c.size=0.001;c.age=0;c.fade=0;c.dead=false;
-  if(type==='butterfly'){const cc=BFC[Math.floor(rand()*BFC.length)];c.cA=srgb(cc[0]);c.cB=srgb(cc[1]);}else{c.cA=T.cA;c.cB=T.cB;}
+  if(type==='butterfly'){c.cA=srgb([0.97,0.56,0.72]);c.cB=srgb([0.55,0.3,0.7]);} // one consistent look: pink butterflies onlyelse{c.cA=T.cA;c.cB=T.cB;}
   c.hz=T.hz||10;c.amp=0.9;c.pts=T.pts;c.hitR=T.hit;c.glow=T.glow||0;c.glowC=T.glowC||[1,1,1];
   c.st='wander';c.tm=rnd(0.3,1.5);c.tgt=null;c.pref=rnd(T.pref[0],T.pref[1]);c.t2=rnd(0.4,1.2);c.kick=[0,0,0];
   c.tut=!!(opt&&opt.tutorial);
